@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 the original author or authors.
+ * Copyright 2018-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,11 +42,11 @@ import org.springframework.util.Assert;
  */
 public class GsonJsonObjectReader<T> implements JsonObjectReader<T> {
 
-	private Class<? extends T> itemType;
+	private final Class<? extends T> itemType;
 
 	private JsonReader jsonReader;
 
-	private Gson mapper = new Gson();
+	private Gson mapper;
 
 	private InputStream inputStream;
 
@@ -55,12 +55,18 @@ public class GsonJsonObjectReader<T> implements JsonObjectReader<T> {
 	 * @param itemType the target item type
 	 */
 	public GsonJsonObjectReader(Class<? extends T> itemType) {
+		this(new Gson(), itemType);
+	}
+
+	public GsonJsonObjectReader(Gson mapper, Class<? extends T> itemType) {
+		this.mapper = mapper;
 		this.itemType = itemType;
 	}
 
 	/**
 	 * Set the object mapper to use to map Json objects to domain objects.
 	 * @param mapper the object mapper to use
+	 * @see #GsonJsonObjectReader(Gson, Class)
 	 */
 	public void setMapper(Gson mapper) {
 		Assert.notNull(mapper, "The mapper must not be null");

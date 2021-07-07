@@ -1,4 +1,4 @@
-# Spring Batch [![build status](https://build.spring.io/plugins/servlet/wittified/build-status/BATCH-GRAD)](https://build.spring.io/browse/BATCH-GRAD)
+# Spring Batch [![build status](https://build.spring.io/plugins/servlet/wittified/build-status/BATCH-MCI)](https://build.spring.io/browse/BATCH-MCI)
 
 Spring Batch is a lightweight, comprehensive batch framework designed to enable the development of robust batch applications vital for the daily operations of enterprise systems.  Spring Batch builds upon the productivity, POJO-based development approach, and general ease of use capabilities people have come to know from the [Spring Framework](https://github.com/spring-projects/spring-framework), while making it easy for developers to access and leverage more advanced enterprise services when necessary.
 
@@ -21,16 +21,43 @@ Clone the git repository using the URL on the Github home page:
 
 ## Command Line
 
-Gradle is the build tool used for Spring Batch. You can build the project via the command:
+Maven is the build tool used for Spring Batch. You can build the project via the command:
 
-    $ ./gradlew build
+    $ ./mvnw package
 
-If you want to perform a full build with all integration tests, ensure you have Docker installed then run:
+If you want to perform a full build with all integration tests, then run:
 
-    $ ./gradlew build -Palltests
+    $ ./mvnw verify
+
+To generate the reference documentation, run:
+
+    $ ./mvnw site
+
+The reference documentation can be found in `spring-batch-docs/target`.
 
 ## Spring Tool Suite (STS)
-In STS (or any Eclipse distro or other IDE with Gradle support), import the module directories as existing projects.  They should compile and the tests should run with no additional steps.
+In STS (or any Eclipse distro or other IDE with Maven support), import the module directories as existing projects.  They should compile and the tests should run with no additional steps.
+
+## Using Docker
+
+If you want to build the project in a Docker container, you can proceed as follows:
+
+```
+$> docker run -it --mount type=bind,source="$(pwd)",target=/spring-batch maven:3-openjdk-8 bash
+#> cd spring-batch
+#> ./mvnw package
+```
+
+This will mount the source code that you cloned previously on the host inside the container.
+If you want to work on a copy of the source code inside the container (no side effects on the host),
+you can proceed as follows:
+
+```
+$> docker run -it maven:3-openjdk-8 bash
+#> git clone https://github.com/spring-projects/spring-batch.git
+#> cd spring-batch
+#> ./mvnw package
+```
 
 # Getting Started Using Spring Boot
 This is the quickest way to get started with a new Spring Batch project.  You find the Getting Started Guide for Spring
@@ -40,7 +67,7 @@ Batch on Spring.io: [Creating a Batch Service](https://spring.io/guides/gs/batch
 
 It requires an internet connection for download, and access to a Maven repository (remote or local).
 
-* Download STS version 3.4.* (or better) from the [Spring website](https://spring.io/tools/sts/).  STS is a free Eclipse bundle with many features useful for Spring developers.
+* Download STS version 3.4.* (or better) from the [Spring website](https://spring.io/tools).  STS is a free Eclipse bundle with many features useful for Spring developers.
 * Go to `File->New->Spring Template Project` from the menu bar (in the Spring perspective).
 * The wizard has a drop down with a list of template projects.  One of them is a "Simple Spring Batch Project".  Select it and follow the wizard.
 * A project is created with all dependencies and a simple input/output job configuration.  It can be run using a unit test, or on the command line (see instructions in the pom.xml).

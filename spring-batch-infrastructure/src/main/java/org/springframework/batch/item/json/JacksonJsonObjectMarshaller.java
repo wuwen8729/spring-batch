@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,11 +31,20 @@ import org.springframework.batch.item.ItemStreamException;
  */
 public class JacksonJsonObjectMarshaller<T> implements JsonObjectMarshaller<T> {
 
-	private ObjectMapper objectMapper = new ObjectMapper();
+	private ObjectMapper objectMapper;
+
+	public JacksonJsonObjectMarshaller() {
+		this(new ObjectMapper());
+	}
+
+	public JacksonJsonObjectMarshaller(ObjectMapper objectMapper) {
+		this.objectMapper = objectMapper;
+	}
 
 	/**
 	 * Set the {@link ObjectMapper} to use.
 	 * @param objectMapper to use
+	 * @see #JacksonJsonObjectMarshaller(ObjectMapper)
 	 */
 	public void setObjectMapper(ObjectMapper objectMapper) {
 		this.objectMapper = objectMapper;

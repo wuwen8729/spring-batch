@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 the original author or authors.
+ * Copyright 2018-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,11 +39,11 @@ import org.springframework.util.Assert;
  */
 public class JacksonJsonObjectReader<T> implements JsonObjectReader<T> {
 
-	private Class<? extends T> itemType;
+	private final Class<? extends T> itemType;
 
 	private JsonParser jsonParser;
 
-	private ObjectMapper mapper = new ObjectMapper();
+	private ObjectMapper mapper;
 
 	private InputStream inputStream;
 
@@ -52,12 +52,18 @@ public class JacksonJsonObjectReader<T> implements JsonObjectReader<T> {
 	 * @param itemType the target item type
 	 */
 	public JacksonJsonObjectReader(Class<? extends T> itemType) {
+		this(new ObjectMapper(), itemType);
+	}
+
+	public JacksonJsonObjectReader(ObjectMapper mapper, Class<? extends T> itemType) {
+		this.mapper = mapper;
 		this.itemType = itemType;
 	}
 
 	/**
 	 * Set the object mapper to use to map Json objects to domain objects.
 	 * @param mapper the object mapper to use
+	 * @see #JacksonJsonObjectReader(ObjectMapper, Class)
 	 */
 	public void setMapper(ObjectMapper mapper) {
 		Assert.notNull(mapper, "The mapper must not be null");

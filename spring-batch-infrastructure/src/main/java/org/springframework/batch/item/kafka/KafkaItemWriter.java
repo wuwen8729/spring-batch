@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,13 @@ package org.springframework.batch.item.kafka;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.KeyValueItemWriter;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.util.Assert;
+import org.springframework.util.concurrent.ListenableFuture;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>
@@ -28,21 +34,38 @@ import org.springframework.util.Assert;
  * </p>
  *
  * @author Mathieu Ouellet
+ * @author Mahmoud Ben Hassine
  * @since 4.2
  *
  */
 public class KafkaItemWriter<K, T> extends KeyValueItemWriter<K, T> {
 
-	private KafkaTemplate<K, T> kafkaTemplate;
+	protected KafkaTemplate<K, T> kafkaTemplate;
+	private final List<ListenableFuture<SendResult<K, T>>> listenableFutures = new ArrayList<>();
+	private long timeout = -1;
 
 	@Override
 	protected void writeKeyValue(K key, T value) {
 		if (this.delete) {
-			this.kafkaTemplate.sendDefault(key, null);
+			this.listenableFutures.add(this.kafkaTemplate.sendDefault(key, null));
 		}
 		else {
-			this.kafkaTemplate.sendDefault(key, value);
+			this.listenableFutures.add(this.kafkaTemplate.sendDefault(key, value));
 		}
+	}
+
+	@Override
+	protected void flush() throws Exception{
+		this.kafkaTemplate.flush();
+		for(ListenableFuture<SendResult<K,T>> future: this.listenableFutures){
+			if (this.timeout >= 0) {
+				future.get(this.timeout, TimeUnit.MILLISECONDS);
+			}
+			else {
+				future.get();
+			}
+		}
+		this.listenableFutures.clear();
 	}
 
 	@Override
@@ -58,4 +81,15 @@ public class KafkaItemWriter<K, T> extends KeyValueItemWriter<K, T> {
 	public void setKafkaTemplate(KafkaTemplate<K, T> kafkaTemplate) {
 		this.kafkaTemplate = kafkaTemplate;
 	}
+
+	/**
+	 * The time limit to wait when flushing items to Kafka.
+	 *
+	 * @param timeout milliseconds to wait, defaults to -1 (no timeout).
+	 * @since 4.3.2
+	 */
+	public void setTimeout(long timeout) {
+		this.timeout = timeout;
+	}
+
 }
